@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Stok Akun Premium • Local Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: #0c0c14;
+      color: #eaeaea;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .header .emoji {
+      font-size: 2.4rem;
+    }
+    .card {
+      background: #1a1a26;
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid #2a2a3c;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .stat {
+      flex: 1;
+      background: #222231;
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      border: 1px solid #2e2e44;
+    }
+    .stat .big {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .green {
+      color: #00e676;
+    }
+    .purple {
+      color: #b388ff;
+    }
+    .btn {
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.2s;
+      touch-action: manipulation;
+    }
+    .btn:active {
+      background: #5a4bd1;
+      transform: scale(0.97);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #ff5252;
+      color: #ff5252;
+      padding: 12px;
+      font-size: 0.85rem;
+    }
+    textarea {
+      width: 100%;
+      background: #222231;
+      border: 1px solid #2e2e44;
+      border-radius: 12px;
+      color: white;
+      padding: 14px;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 110px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    textarea:focus {
+      border-color: #6c5ce7;
+    }
+    .list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .list-item {
+      background: #222231;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ff5252;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 6px;
+    }
+    .result-box {
+      background: #1e1e32;
+      border: 2px solid #6c5ce7;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2d2d44;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      transition: 0.3s;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      bottom: 40px;
+    }
+    .small-btn {
+      background: #2a2a3c;
+      border: 1px solid #3a3a50;
+      color: #ddd;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="emoji">📦</div>
+    <h1>Stok Akun Premium</h1>
+    <p style="color:#888; font-size:0.8rem;">Data tersimpan otomatis di HP-mu</p>
+  </div>
+
+  <!-- Ringkasan -->
+  <div class="card">
+    <div class="row">
+      <div class="stat"><span class="big green" id="availableCount">0</span><br><small>Tersedia</small></div>
+      <div class="stat"><span class="big purple" id="takenCount">0</span><br><small>Terjual</small></div>
+      <div class="stat"><span class="big" id="totalCount">0</span><br><small>Total</small></div>
+    </div>
+    <button class="btn" id="takeBtn" onclick="ambilSatuAkun()">🎯 Ambil 1 Akun</button>
+  </div>
+
+  <!-- Hasil Ambil -->
+  <div class="result-box" id="resultBox">
+    <div style="color:#b388ff; font-weight:700;">✅ Akun berhasil diambil</div>
+    <div id="akunText" style="font-weight:700; margin:8px 0; word-break:break-all;"></div>
+    <button class="small-btn" onclick="salinAkun()">📋 Salin</button>
+    <button class="small-btn" onclick="document.getElementById('resultBox').style.display='none'">Tutup</button>
+  </div>
+
+  <!-- Input Stok -->
+  <div class="card">
+    <h3 style="margin-bottom:8px;">➕ Tambah Stok</h3>
+    <textarea id="stokInput" placeholder="Masukkan akun (1 baris = 1 akun)&#10;contoh: netflix@mail.com|pass123"></textarea>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" style="flex:2;" onclick="simpanStok()">💾 Simpan ke Stok</button>
+      <button class="small-btn" style="flex:1;" onclick="kosongkanInput()">🗑 Kosongkan</button>
+    </div>
+  </div>
+
+  <!-- Daftar Stok -->
+  <div class="card">
+    <h3 style="margin-bottom:6px;">📋 Daftar Stok Tersedia</h3>
+    <div class="list" id="stockList">- Belum ada stok -</div>
+    <button class="btn-outline" style="width:100%;" onclick="hapusSemuaStok()">🗑 Hapus Semua Stok</button>
+  </div>
+
+  <!-- Riwayat -->
+  <div class="card">
+    <h3 style="margin-bottom:6px;">🕓 Riwayat Diambil</h3>
+    <div class="list" id="historyList">- Kosong -</div>
+    <button class="btn-outline" style="width:100%;" onclick="hapusRiwayat()">🗑 Hapus Riwayat</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Local Storage keys
+  const STOCK_KEY = 'akun_stock';
+  const HISTORY_KEY = 'akun_history';
+
+  // Fungsi bantu
+  function getStock() {
+    return JSON.parse(localStorage.getItem(STOCK_KEY) || '[]');
+  }
+  function saveStock(data) {
+    localStorage.setItem(STOCK_KEY, JSON.stringify(data));
+  }
+  function getHistory() {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  }
+  function saveHistory(data) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(data));
+  }
+
+  function showToast(msg, isGood = true) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isGood ? '#1e3a2f' : '#3a1e1e';
+    t.classList.add('show');
+    clearTimeout(t.hideTimer);
+    t.hideTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function renderSemua() {
+    const stock = getStock();
+    const history = getHistory();
+    document.getElementById('availableCount').textContent = stock.length;
+    document.getElementById('takenCount').textContent = history.length;
+    document.getElementById('totalCount').textContent = stock.length + history.length;
+
+    const stockDiv = document.getElementById('stockList');
+    if (stock.length === 0) {
+      stockDiv.innerHTML = '<div style="color:#555; text-align:center; padding:12px;">- Belum ada stok -</div>';
+    } else {
+      stockDiv.innerHTML = stock.map((item, i) => 
+        `<div class="list-item"><span>🔹 ${escapeHtml(item)}</span> <button class="delete-btn" onclick="hapusStok(${i})">✕</button></div>`
+      ).join('');
+    }
+
+    const histDiv = document.getElementById('historyList');
+    if (history.length === 0) {
+      histDiv.innerHTML = '<div style="color:#555; text-align:center; padding:12px;">- Belum ada riwayat -</div>';
+    } else {
+      histDiv.innerHTML = [...history].reverse().map(h => 
+        `<div class="list-item"><span>📌 ${escapeHtml(h.akun)}</span><small style="color:#888;">${h.waktu}</small></div>`
+      ).join('');
+    }
+  }
+
+  function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  // === AKSI TOMBOL ===
+  function simpanStok() {
+    const input = document.getElementById('stokInput');
+    const raw = input.value.trim();
+    if (!raw) {
+      showToast('⚠️ Masukkan minimal 1 akun', false);
+      return;
+    }
+    const lines = raw.split(/\n/).map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) {
+      showToast('⚠️ Tidak ada baris valid', false);
+      return;
+    }
+    const stock = getStock();
+    const gabung = stock.concat(lines);
+    saveStock(gabung);
+    input.value = '';
+    showToast(`✅ ${lines.length} akun ditambahkan`);
+    renderSemua();
+  }
+
+  function kosongkanInput() {
+    document.getElementById('stokInput').value = '';
+    showToast('🧹 Input dikosongkan');
+  }
+
+  function ambilSatuAkun() {
+    const stock = getStock();
+    if (stock.length === 0) {
+      showToast('❌ Stok habis! Tambahkan dulu.', false);
+      return;
+    }
+    const diambil = stock.shift();
+    saveStock(stock);
+
+    // catat history
+    const history = getHistory();
+    const sekarang = new Date().toLocaleString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    history.push({ akun: diambil, waktu: sekarang });
+    saveHistory(history);
+
+    // tampilkan
+    document.getElementById('akunText').textContent = diambil;
+    document.getElementById('resultBox').style.display = 'block';
+    window.scrollTo({ top: document.getElementById('resultBox').offsetTop - 20, behavior: 'smooth' });
+    showToast('🎉 1 akun berhasil diambil!');
+    renderSemua();
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+
+  function salinAkun() {
+    const teks = document.getElementById('akunText').textContent;
+    navigator.clipboard?.writeText(teks).then(() => showToast('📋 Disalin!')).catch(() => showToast('Gagal salin', false));
+  }
+
+  function hapusStok(index) {
+    const stock = getStock();
+    stock.splice(index, 1);
+    saveStock(stock);
+    showToast('🗑 Akun dihapus dari stok', false);
+    renderSemua();
+  }
+
+  function hapusSemuaStok() {
+    if (confirm('Yakin hapus SEMUA stok?')) {
+      saveStock([]);
+      showToast('🗑 Semua stok dihapus', false);
+      renderSemua();
+    }
+  }
+
+  function hapusRiwayat() {
+    if (confirm('Hapus semua riwayat?')) {
+      saveHistory([]);
+      showToast('Riwayat dibersihkan');
+      renderSemua();
+    }
+  }
+
+  // inisialisasi
+  renderSemua();
+</script>
+</body>
+</html>
